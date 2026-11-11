@@ -86,7 +86,7 @@ const MyListings = () => {
 
               return (
                 <div key={l._id} className="overflow-hidden rounded-2xl bg-white shadow transition hover:shadow-lg">
-                  {/* image */}
+
                   <div className="relative h-48 bg-slate-200">
                     {cover ? (
                       <img src={cover.url} alt={l.title} className="h-full w-full object-cover" />
@@ -102,7 +102,7 @@ const MyListings = () => {
                     </span>
                   </div>
 
-                  {/* details */}
+
                   <div className="p-4">
                     <h2 className="truncate text-lg font-semibold text-slate-900">{l.title}</h2>
                     <p className="mt-1 text-xl font-bold text-blue-600">
@@ -127,7 +127,7 @@ const MyListings = () => {
                       </span>
                     </div>
 
-                    {/* status change */}
+
                     <div className="mt-4">
                       {canChange ? (
                         <select
@@ -149,7 +149,7 @@ const MyListings = () => {
                       )}
                     </div>
 
-                    {/* buttons */}
+
                     <div className="mt-4 flex gap-3">
                       <Link
                         to={`/edit-listing/${l._id}`}

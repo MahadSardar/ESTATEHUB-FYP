@@ -1,6 +1,5 @@
 import cloudinary from "../config/cloudinary.js";
 
-// uploads one multer file from memory and returns { url, publicId, type }
 const uploadToCloudinary = (file) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(

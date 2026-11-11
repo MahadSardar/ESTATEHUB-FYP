@@ -10,7 +10,7 @@ const Verify = () => {
   const location = useLocation();
   const { loginUser } = useAuth();
 
-  // email comes from the Register or Login page
+
   const email = location.state?.email;
 
   const [code, setCode] = useState("");

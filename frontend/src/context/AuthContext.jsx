@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // on page load: if a token is saved, get the user from the backend
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
       .finally(() => setLoading(false));
   }, []);
 
-  // call this after login or email verification
+
   const loginUser = (token, userData) => {
     localStorage.setItem("token", token);
     setUser(userData);

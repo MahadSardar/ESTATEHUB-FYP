@@ -1,6 +1,6 @@
 import multer from "multer";
 
-// keep the file in memory, we send it to Cloudinary right after
+// multer temporary memory hoti hai
 const storage = multer.memoryStorage();
 
 const upload = multer({

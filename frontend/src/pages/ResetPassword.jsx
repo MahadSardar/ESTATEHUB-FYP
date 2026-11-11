@@ -8,7 +8,7 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // email comes from the Forgot Password page
+
   const email = location.state?.email;
 
   const [code, setCode] = useState("");
@@ -16,7 +16,7 @@ const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // no email means the user opened this page directly
+
   if (!email) {
     return (
       <div className="flex min-h-[calc(100vh-61px)] items-center justify-center bg-slate-100 px-4">

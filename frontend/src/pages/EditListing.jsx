@@ -23,12 +23,12 @@ const EditListing = () => {
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
 
-  const [media, setMedia] = useState([]); // files already uploaded
-  const [files, setFiles] = useState([]); // new files to add
+  const [media, setMedia] = useState([]); 
+  const [files, setFiles] = useState([]); 
   const [pageLoading, setPageLoading] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // load the listing and fill the form
+
   const loadListing = async () => {
     try {
       const res = await api.get("/listings/my");
@@ -66,7 +66,7 @@ const EditListing = () => {
     loadListing();
   }, []);
 
-  // reload only the media list (after delete or set cover)
+
   const reloadMedia = async () => {
     try {
       const res = await api.get("/listings/my");
@@ -153,7 +153,7 @@ const EditListing = () => {
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Edit property</h1>
         </div>
 
-        {/* current photos and videos */}
+
         <div className="mb-6">
           <label className={label}>Current photos and videos</label>
           {media.length === 0 ? (

@@ -25,7 +25,7 @@ const Navbar = () => {
                     EstateHub
                 </Link>
 
-                {/* desktop links */}
+
                 <div className="hidden items-center gap-6 md:flex">
                     <Link to="/" className="text-gray-300 transition hover:text-white">
                         Home
@@ -72,13 +72,12 @@ const Navbar = () => {
                     )}
                 </div>
 
-                {/* mobile menu button */}
+
                 <button className="text-white md:hidden" onClick={() => setOpen(!open)}>
                     {open ? <X size={26} /> : <Menu size={26} />}
                 </button>
             </div>
 
-            {/* mobile menu */}
             {open && (
                 <div className="flex flex-col gap-4 border-t border-slate-800 px-4 py-4 md:hidden">
                     <Link to="/" onClick={() => setOpen(false)} className="text-gray-300">

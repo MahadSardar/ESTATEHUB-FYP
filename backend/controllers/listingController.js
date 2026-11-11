@@ -3,7 +3,7 @@ import Media from "../models/Media.js";
 import cloudinary from "../config/cloudinary.js";
 import uploadToCloudinary from "../utils/uploadToCloudinary.js";
 
-// POST /api/listings (form-data, files in "media")
+
 export const createListing = async (req, res) => {
   try {
     const {
@@ -17,14 +17,14 @@ export const createListing = async (req, res) => {
       city, locality, address, area, areaUnit, bedrooms, bathrooms,
     };
 
-    // coordinates are [lng, lat]
+
     if (lat && lng) {
       data.location = { type: "Point", coordinates: [Number(lng), Number(lat)] };
     }
 
     const listing = await Listing.create(data);
 
-    // upload files, the first image becomes the cover
+
     const files = req.files || [];
     let coverSet = false;
     for (let i = 0; i < files.length; i++) {
@@ -55,12 +55,12 @@ export const createListing = async (req, res) => {
   }
 };
 
-// GET /api/listings/my
+
 export const getMyListings = async (req, res) => {
   try {
     const listings = await Listing.find({ owner: req.user._id }).sort("-createdAt");
 
-    // attach the media of each listing
+
     const result = await Promise.all(
       listings.map(async (l) => {
         const media = await Media.find({ listing: l._id }).sort("sortOrder");
@@ -74,7 +74,7 @@ export const getMyListings = async (req, res) => {
   }
 };
 
-// PUT /api/listings/:id (form-data, new files in "media")
+
 export const updateListing = async (req, res) => {
   try {
     const listing = await Listing.findById(req.params.id);
@@ -106,7 +106,7 @@ export const updateListing = async (req, res) => {
 
     await listing.save();
 
-    // add the new files, the first image becomes cover only if there is no cover yet
+
     let hasCover = await Media.exists({ listing: listing._id, isCover: true });
     for (let i = 0; i < files.length; i++) {
       const result = await uploadToCloudinary(files[i]);
@@ -131,7 +131,7 @@ export const updateListing = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-// DELETE /api/listings/:id/media/:mediaId
+
 export const deleteMedia = async (req, res) => {
   try {
     const listing = await Listing.findById(req.params.id);
@@ -167,7 +167,7 @@ export const deleteMedia = async (req, res) => {
   }
 };
 
-// PATCH /api/listings/:id/media/:mediaId/cover
+
 export const setCover = async (req, res) => {
   try {
     const listing = await Listing.findById(req.params.id);
@@ -196,7 +196,7 @@ export const setCover = async (req, res) => {
   }
 };
 
-// DELETE /api/listings/:id
+
 export const deleteListing = async (req, res) => {
   try {
     const listing = await Listing.findById(req.params.id);
@@ -207,7 +207,7 @@ export const deleteListing = async (req, res) => {
       return res.status(403).json({ message: "Not your listing" });
     }
 
-    // remove files from Cloudinary, then from the database
+
     const media = await Media.find({ listing: listing._id });
     for (const m of media) {
       if (m.publicId) {
@@ -223,7 +223,7 @@ export const deleteListing = async (req, res) => {
   }
 };
 
-// PATCH /api/listings/:id/status (owner: inactive, sold, rented, active)
+
 export const changeStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -239,7 +239,6 @@ export const changeStatus = async (req, res) => {
       return res.status(403).json({ message: "Not your listing" });
     }
 
-    // pending and rejected listings are controlled by the admin only
     if (listing.status === "pending" || listing.status === "rejected") {
       return res
         .status(400)
@@ -253,81 +252,8 @@ export const changeStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-// makes user text safe to use inside a search pattern
-const escapeText = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-// GET /api/listings (public, only active listings)
-// filters: q, txnType, propertyType, city, locality, minPrice, maxPrice,
-//          minArea, maxArea, bedrooms, sort, page, limit
-export const getListings = async (req, res) => {
-  try {
-    const {
-      q, txnType, propertyType, city, locality,
-      minPrice, maxPrice, minArea, maxArea, bedrooms,
-      sort, page = 1, limit = 12,
-    } = req.query;
 
-    const filter = { status: "active" };
-
-    if (txnType) filter.txnType = txnType;
-    if (propertyType) filter.propertyType = propertyType;
-    if (city) filter.city = new RegExp(escapeText(city), "i");
-    if (locality) filter.locality = new RegExp(escapeText(locality), "i");
-
-    // free text search in title, city and locality
-    if (q) {
-      const pattern = new RegExp(escapeText(q), "i");
-      filter.$or = [{ title: pattern }, { city: pattern }, { locality: pattern }];
-    }
-
-    if (minPrice || maxPrice) {
-      filter.price = {};
-      if (minPrice) filter.price.$gte = Number(minPrice);
-      if (maxPrice) filter.price.$lte = Number(maxPrice);
-    }
-    if (minArea || maxArea) {
-      filter.area = {};
-      if (minArea) filter.area.$gte = Number(minArea);
-      if (maxArea) filter.area.$lte = Number(maxArea);
-    }
-    if (bedrooms) filter.bedrooms = { $gte: Number(bedrooms) };
-
-    let sortBy = "-createdAt";
-    if (sort === "price_asc") sortBy = "price";
-    if (sort === "price_desc") sortBy = "-price";
-
-    const pageNum = Math.max(Number(page), 1);
-    const limitNum = Math.min(Math.max(Number(limit), 1), 50);
-
-    const total = await Listing.countDocuments(filter);
-    const listings = await Listing.find(filter)
-      .sort(sortBy)
-      .skip((pageNum - 1) * limitNum)
-      .limit(limitNum);
-
-    // attach the cover image of each listing
-    const result = await Promise.all(
-      listings.map(async (l) => {
-        const cover = await Media.findOne({ listing: l._id, type: "image" }).sort({
-          isCover: -1,
-          sortOrder: 1,
-        });
-        return { ...l.toObject(), cover: cover ? cover.url : null };
-      })
-    );
-
-    res.json({
-      listings: result,
-      total,
-      page: pageNum,
-      pages: Math.ceil(total / limitNum),
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// GET /api/listings/:id (public, only active listings, counts a view)
 export const getListingById = async (req, res) => {
   try {
     const listing = await Listing.findOneAndUpdate(
@@ -343,7 +269,7 @@ export const getListingById = async (req, res) => {
     const media = await Media.find({ listing: listing._id }).sort("sortOrder");
     res.json({ listing, media });
   } catch (error) {
-    // a badly formed id
+
     if (error.name === "CastError") {
       return res.status(404).json({ message: "Listing not found" });
     }

@@ -7,7 +7,6 @@ import {
   changeStatus,
   deleteMedia,
   setCover,
-  getListings,
   getListingById,
 } from "../controllers/listingController.js";
 import { protect } from "../middleware/authMiddleware.js";
@@ -15,13 +14,9 @@ import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-// public
-router.get("/", getListings);
-
-// my listings (must stay above "/:id")
 router.get("/my", protect, getMyListings);
 
-// public
+
 router.get("/:id", getListingById);
 
 // logged in

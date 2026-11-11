@@ -23,7 +23,7 @@ const Login = () => {
       toast.success("Welcome back!");
       navigate("/");
     } catch (error) {
-      // email not verified yet: go to the Verify page
+
       if (error.response?.data?.needsVerification) {
         toast.error(error.response.data.message);
         navigate("/verify", { state: { email: error.response.data.email } });
